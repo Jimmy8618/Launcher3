@@ -827,6 +827,9 @@ public class LoaderTask implements Runnable {
                 // This builds the icon bitmaps.
                 mBgAllAppsList.add(new AppInfo(app, user, quietMode), app);
             }
+	    mBgAllAppsList.removePackage("com.clovsoft.smartclass.teacher",user);
+            mBgAllAppsList.added.removeAll(mBgAllAppsList.removed);
+            mBgAllAppsList.removed.clear();
         }
 
         if (FeatureFlags.LAUNCHER3_PROMISE_APPS_IN_ALL_APPS) {

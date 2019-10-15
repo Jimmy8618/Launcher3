@@ -29,6 +29,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimationSuccessListener;
 import com.android.launcher3.anim.AnimatorSetBuilder;
 import com.android.launcher3.anim.PropertySetter;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ScrimView;
 
@@ -150,6 +151,9 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
      */
     @Override
     public void setState(LauncherState state) {
+        if(FeatureFlags.REMOVE_DRAWER) {
+            return;
+        }
         setProgress(state.getVerticalProgress(mLauncher));
         setAlphas(state, NO_ANIM_PROPERTY_SETTER);
         onProgressAnimationEnd();
@@ -162,6 +166,9 @@ public class AllAppsTransitionController implements StateHandler, OnDeviceProfil
     @Override
     public void setStateWithAnimation(LauncherState toState,
             AnimatorSetBuilder builder, AnimationConfig config) {
+        if(FeatureFlags.REMOVE_DRAWER) {
+            return;
+        }
         float targetProgress = toState.getVerticalProgress(mLauncher);
         if (Float.compare(mProgress, targetProgress) == 0) {
             setAlphas(toState, config.getPropertySetter(builder));

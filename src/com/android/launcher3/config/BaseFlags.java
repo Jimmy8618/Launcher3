@@ -28,12 +28,14 @@ abstract class BaseFlags {
 
     BaseFlags() {}
 
+    public static final boolean REMOVE_DRAWER = true;
+
     public static final boolean IS_DOGFOOD_BUILD = false;
     public static final String AUTHORITY = "com.android.launcher3.settings".intern();
 
     // When enabled allows to use any point on the fast scrollbar to start dragging.
     public static final boolean LAUNCHER3_DIRECT_SCROLL = true;
-    // When enabled the promise icon is visible in all apps while installation an app.
+    // When enabled the promise icon is visible in all apps while installation an app.LoaderTask
     public static final boolean LAUNCHER3_PROMISE_APPS_IN_ALL_APPS = false;
     // When enabled allows use of spring motions on the icons.
     public static final boolean LAUNCHER3_SPRING_ICONS = true;

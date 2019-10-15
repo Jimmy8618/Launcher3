@@ -18,11 +18,12 @@ package com.android.launcher3.model;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.pm.LauncherActivityInfo;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.launcher3.AllAppsList;
 import com.android.launcher3.AppInfo;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Handles updates due to changes in package manager (app installed/updated/removed)
@@ -153,6 +155,9 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
 
         final ArrayList<AppInfo> addedOrModified = new ArrayList<>();
         addedOrModified.addAll(appsList.added);
+        if(FeatureFlags.REMOVE_DRAWER){
+            updateToWorkSpace(context, app, appsList);
+        }
         appsList.added.clear();
         addedOrModified.addAll(appsList.modified);
         appsList.modified.clear();
@@ -346,6 +351,32 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
                 dataModel.widgetsModel.update(app, new PackageUserKey(packages[i], mUser));
             }
             bindUpdatedWidgets(dataModel);
+        }
+    }
+
+    private void updateToWorkSpace(Context context, LauncherAppState app, AllAppsList appsList) {
+        if (FeatureFlags.REMOVE_DRAWER) {
+            List<Pair<ItemInfo, Object>> installQueue = new ArrayList();
+            final List<UserHandle> profiles = UserManagerCompat.getInstance(context).getUserProfiles();
+            ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<>();
+            for (UserHandle user : profiles) {
+                final List<LauncherActivityInfo> apps = LauncherAppsCompat.getInstance(context).getActivityList(null, user);
+                Log.d("jimmy","updateToWorkSpace apps="+apps);
+                synchronized (this) {
+                    for (LauncherActivityInfo info : apps) {
+                        for (AppInfo appInfo : appsList.added) {
+                            if (info.getComponentName().equals(appInfo.componentName)) {
+                                InstallShortcutReceiver.PendingInstallShortcutInfo mPendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(info, context);
+                                added.add(mPendingInstallShortcutInfo);
+                                installQueue.add(mPendingInstallShortcutInfo.getItemInfo());
+                            }
+                        }
+                    }
+                }
+            }
+            if (!added.isEmpty()) {
+                app.getModel().addAndBindAddedWorkspaceItems(installQueue);
+            }
         }
     }
 }

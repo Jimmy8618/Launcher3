@@ -31,13 +31,16 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.launcher3.DeleteDropTarget;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.ItemInfo;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import com.android.launcher3.ShortcutInfo;
 import com.android.launcher3.accessibility.DragViewStateAnnouncer;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.ItemInfoMatcher;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.TouchController;
@@ -601,11 +604,21 @@ public class DragController implements DragDriver.EventListener, TouchController
                     dropTarget.onDrop(mDragObject, mOptions);
                 }
                 accepted = true;
+
+                if (FeatureFlags.REMOVE_DRAWER && dropTarget instanceof DeleteDropTarget &&
+                        isNeedCancelDrag(mDragObject.dragInfo)) {
+                    cancelDrag();
+                }
             }
         }
         final View dropTargetAsView = dropTarget instanceof View ? (View) dropTarget : null;
         mLauncher.getUserEventDispatcher().logDragNDrop(mDragObject, dropTargetAsView);
         dispatchDropComplete(dropTargetAsView, accepted);
+    }
+
+    private boolean isNeedCancelDrag(ItemInfo itemInfo) {
+        return (itemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
+                itemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_FOLDER);
     }
 
     private DropTarget findDropTarget(int x, int y, int[] dropCoordinates) {

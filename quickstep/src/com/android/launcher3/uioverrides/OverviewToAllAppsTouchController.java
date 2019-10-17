@@ -19,11 +19,13 @@ import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.NORMAL;
 import static com.android.launcher3.LauncherState.OVERVIEW;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.quickstep.TouchInteractionService;
 import com.android.quickstep.views.RecentsView;
@@ -46,6 +48,11 @@ public class OverviewToAllAppsTouchController extends PortraitStatesTouchControl
             return true;
         }
         if (AbstractFloatingView.getTopOpenView(mLauncher) != null) {
+            return false;
+        }
+
+        if(FeatureFlags.REMOVE_DRAWER) {
+            Log.d("jimmy","OverviewToAllAppsTouchController canInterceptTouch");
             return false;
         }
         if (mLauncher.isInState(ALL_APPS)) {
